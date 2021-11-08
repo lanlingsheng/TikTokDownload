@@ -18,22 +18,15 @@ class TikTok():
         self.headers = {
             'user-agent': 'Mozilla/5.0 (Linux; Android 8.0; Pixel 2 Build/OPD3.170816.012) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Mobile Safari/537.36 Edg/87.0.664.66'
             }
-        
+
         #抓获所有视频
         self.Isend = False
         self.out_Print()
         #绘制布局
         print("#" * 120)
-        print( 
+        print(
     """
                                                     TikTokDownload V1.2.3
-        使用说明：
-                1、运行软件前先打开目录下 conf.ini 文件按照要求进行配置
-                2、批量下载可直接修改配置文件，单一视频下载请直接打开粘贴视频链接即可
-                3、如有您有任何bug或者意见反馈请在 https://github.com/Johnserf-Seed/TikTokDownload/issues 发起
-                4、后续可能会更新GUI界面，操作更简单
-
-        注意：  单个视频链接与用户主页链接要分清，软件闪退可以通过终端运行查看报错信息（一般是链接弄错的问题）
     """
         )
         print("#" * 120)
@@ -45,7 +38,7 @@ class TikTok():
         else:
             print('----没有检测到配置文件，生成中----\r')
             try:
-                self.cf = configparser.ConfigParser()
+                self.cf = configparser.RawConfigParser()
                 # 往配置文件写入内容
                 self.cf.add_section("url")
                 self.cf.set("url", "uid", "https://v.douyin.com/JcjJ5Tq/")
@@ -68,7 +61,7 @@ class TikTok():
                 sys.exit()
 
         #实例化读取配置文件
-        self.cf = configparser.ConfigParser()
+        self.cf = configparser.RawConfigParser()
 
         #用utf-8防止出错
         self.cf.read("conf.ini", encoding="utf-8")
@@ -78,16 +71,16 @@ class TikTok():
 
         #读取下载视频个数
         self.count = int(self.cf.get("count","count"))
-    
+
         #读取下载是否下载音频
         self.musicarg = self.cf.get("music","musicarg")
 
         #读取用户主页地址
-        self.uid = input('批量下载直接回车，单一视频下载直接粘贴视频链接：')
-        if self.uid == '':
-            self.uid = self.cf.get("url","uid")
-        else:
-            pass
+        # self.uid = input('批量下载直接回车，单一视频下载直接粘贴视频链接：')
+        # if self.uid == '':
+        self.uid = self.cf.get("url","uid")
+        # else:
+        #     pass
 
         #读取下载模式
         self.mode = self.cf.get("mode","mode")
@@ -110,7 +103,7 @@ class TikTok():
      ╚═╝   ╚═╝╚═╝  ╚═╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚═════╝  ╚═════╝  ╚══╝╚══╝ ╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═════╝''')
 
     #匹配粘贴的url地址
-    def Find(self,string): 
+    def Find(self,string):
         # findall() 查找匹配正则表达式的字符串
         url = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', string)
         return url
@@ -246,7 +239,7 @@ class TikTok():
             except Exception as error:
                 #print(error)
                 pass
-        self.videos_download(author_list,video_list,aweme_id,nickname,max_cursor)      
+        self.videos_download(author_list,video_list,aweme_id,nickname,max_cursor)
         return self,author_list,video_list,aweme_id,nickname,max_cursor
 
     #检测视频是否已经下载过
@@ -265,7 +258,7 @@ class TikTok():
         except:
             pass
 
-        v_info = self.check_info(self.nickname)      
+        v_info = self.check_info(self.nickname)
 
         for i in range(self.count):
 
@@ -293,7 +286,7 @@ class TikTok():
             except:
                 #防止下标越界
                 pass
-            
+
             #尝试下载音频
             try:
                 if self.musicarg == "yes":                              #保留音频
@@ -306,12 +299,12 @@ class TikTok():
                     content_size = int(music.headers['content-length']) # 下载文件总大小
                     if music.status_code == 200:                        #判断是否响应成功
                         print('[  音频  ]:'+ creat_time + author_list[i]+'[文件 大小]:{size:.2f} MB'.format(size = content_size / chunk_size /1024)) #开始下载，显示下载文件大小
-                        
+
                         if self.mode == 'post':
                             m_url = self.save + self.mode + "\\" + nickname[i] + '\\' + creat_time + re.sub(r'[\\/:*?"<>|\r\n]+', "_", music_title) + '_' + author_list[i] + '.mp3'
                         else:
                             m_url = self.save + self.mode + "\\" + self.nickname + '\\' + str(self.like_counts)+ '、' + re.sub(r'[\\/:*?"<>|\r\n]+', "_", music_title) + '_' + author_list[i] + '.mp3'
-                        
+
                         with open(m_url,'wb') as file:              #显示进度条
                             for data in music.iter_content(chunk_size = chunk_size):
                                 file.write(data)
@@ -332,12 +325,12 @@ class TikTok():
                 try:
                     if video.status_code == 200:                    #判断是否响应成功
                         print('[  视频  ]:'+ creat_time + author_list[i]+'[文件 大小]:{size:.2f} MB'.format(size = content_size / chunk_size /1024)) #开始下载，显示下载文件大小
-                        
+
                         if self.mode == 'post':
                             v_url = self.save + self.mode + "\\" + nickname[i] + '\\' + creat_time +re.sub(r'[\\/:*?"<>|\r\n]+', "_", author_list[i]) + '.mp4'
                         else:
                             v_url = self.save + self.mode + "\\" + self.nickname + '\\' + str(self.like_counts)+ '、' + re.sub(r'[\\/:*?"<>|\r\n]+', "_", author_list[i]) + '.mp4'
-                        
+
                         with open(v_url,'wb') as file:              #显示进度条
                             for data in video.iter_content(chunk_size = chunk_size):
                                 file.write(data)
